@@ -1,0 +1,32 @@
+version: '2'
+services:
+  mongodb:
+    container_name: account-store
+    hostname: mongodb
+    image: mongo:3.0.4
+    ports:
+      - "27017:27017"
+    command: "mongod --smallfiles --logpath=/dev/null"
+    environment:
+      - MONGODB_ROOT_PASSWORD=123456
+      - MONGODB_ROOT_USERNAME=admin
+      - MONGODB_DATABASE=account
+      - MONGODB_PASSWORD=sasa
+      - MONGODB_USERNAME=admin
+
+  propagation-sample-spring:
+    build: ../spring-propagation-sample
+    image: account-image
+    depends_on: # account-store will be started before the account-image
+      - mongodb
+    ports:
+      - "8080:8080"
+    links:
+      - mongodb
+    environment: #mongodb://admin:123456@mongodb:27017/account
+      - "SPRING_DATA_MONGODB_URI: mongodb://admin:123456@mongodb:27017/account"
+
+  propagation-sample-node:
+    build: ../Koa2-propagation-sample
+    ports:
+      - "4000:4000"
